@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Unique,
 } from 'typeorm';
 import { Project } from './project.entity';
 
@@ -22,9 +23,10 @@ export class User {
   name: string;
 
   @Column({ unique: true })
+  @Unique(['email'])
   email: string;
 
-  @Column()
+  @Column({ select: false })
   passwordHash: string;
 
   @Column({ nullable: true })

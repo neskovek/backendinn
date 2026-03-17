@@ -9,6 +9,7 @@ import { UserModule } from './user.module';
 import { AuthModule } from './auth.module';
 import { User } from '../models/user.entity';
 import { Project } from '../models/project.entity';
+import { HealthController } from 'src/controllers/health.controller';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { Project } from '../models/project.entity';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         entities: [User, Project],
-        synchronize: true,
+        synchronize: false,
       }),
     }),
     ProjectModule,
@@ -33,5 +34,6 @@ import { Project } from '../models/project.entity';
     AuthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  controllers: [HealthController]
 })
 export class AppModule {}

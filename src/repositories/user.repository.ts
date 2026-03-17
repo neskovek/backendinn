@@ -32,7 +32,11 @@ export class UserRepository {
   }
 
   findByEmail(email: string): Promise<User | null> {
-    return this.repo.findOne({ where: { email } });
+    return this.repo
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.email = :email', { email })
+      .getOne();
   }
 
   save(user: Partial<User>): Promise<User> {
