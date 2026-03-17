@@ -7,7 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Goals } from '../interfaces/project';
+import { Goals } from '../interfaces/goals';
 
 export enum ProjectStatus {
   PENDING = 'pendente',

@@ -1,8 +1,11 @@
 import { Controller, Get, Post, Delete, Param, Body, Query, Put } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ProjectStatus } from '../models/project.entity';
-import { Project } from '../interfaces/project';
 import { ProjectService } from '../services/project.service';
+import { CreateProjectDto } from '../dtos/project/create-project.dto';
+import { UpdateProjectDto } from '../dtos/project/update-project.dto';
 
+@ApiTags('projects')
 @Controller('project')
 export class ProjectController {
   constructor(private readonly projectsService: ProjectService) {}
@@ -23,12 +26,12 @@ export class ProjectController {
   }
 
   @Post()
-  create(@Body() dto: Project) {
+  create(@Body() dto: CreateProjectDto) {
     return this.projectsService.save(dto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() data: Project) {
+  update(@Param('id') id: string, @Body() data: UpdateProjectDto) {
     return this.projectsService.update(id, data);
   }
 

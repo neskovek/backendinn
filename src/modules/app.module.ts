@@ -25,7 +25,7 @@ import { Project } from '../models/project.entity';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         entities: [User, Project],
-        synchronize: true,
+        synchronize: false,
       }),
     }),
     ProjectModule,

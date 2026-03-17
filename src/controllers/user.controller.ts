@@ -1,7 +1,9 @@
 import { Controller, Get, Delete, Param, Body, Put, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { UserService } from '../services/user.service';
-import { User } from '../models/user.entity';
+import { UpdateUserDto } from '../dtos/user/update-user.dto';
 
+@ApiTags('users')
 @Controller('user')
 export class UserController {
   constructor(private readonly usersService: UserService) {}
@@ -20,7 +22,7 @@ export class UserController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() data: User) {
+  update(@Param('id') id: string, @Body() data: UpdateUserDto) {
     return this.usersService.update(id, data);
   }
 
