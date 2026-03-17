@@ -6,7 +6,7 @@ import { User } from '../models/user.entity';
 export class UserService {
   constructor(private readonly usersRepository: UserRepository) {}
 
-  findAll(page?: number, limit?: number): Promise<User[]> {
+  findAll(page?: number, limit?: number): Promise<{ result: User[]; pagination: { page: number; itensCount: number; limit: number } }> {
     return this.usersRepository.findAll(page, limit);
   }
 
@@ -24,10 +24,13 @@ export class UserService {
     return this.usersRepository.save(data);
   }
 
-  async update(id: string, data: Partial<User>): Promise<User> {
-    const user = await this.usersRepository.update(id, data);
-    if (!user) throw new NotFoundException('User not found');
-    return user;
+  async update(id: string, data: Partial<User>): Promise<{ id: string }> {
+    const updatedUser = await this.usersRepository.update(id, data);
+    if (!updatedUser) throw new NotFoundException('User not found');
+
+    return {
+      id: updatedUser.id
+    }
   }
 
   async delete(id: string): Promise<void> {

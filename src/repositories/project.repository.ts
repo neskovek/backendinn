@@ -10,22 +10,31 @@ export class ProjectRepository {
     private readonly repo: Repository<Project>,
   ) {}
 
-  findAll(
+  async findAll(
     filters?: { status?: ProjectStatus; userId?: string },
     page = 1,
     limit = 100,
-  ): Promise<Project[]> {
+  ): Promise<{ result: Project[]; pagination: { page: number; itensCount: number; limit: number } }> {
     const where: any = {};
 
     if (filters?.status) where.status = filters.status;
     if (filters?.userId) where.user = { id: filters.userId };
 
-    return this.repo.find({
+    const [result, itensCount] = await this.repo.findAndCount({
       where,
       relations: ['user'],
       skip: (page - 1) * limit,
       take: limit,
     });
+
+    return {
+      result,
+      pagination: {
+        page,
+        itensCount,
+        limit,
+      },
+    }
   }
 
   findById(id: string): Promise<Project | null> {

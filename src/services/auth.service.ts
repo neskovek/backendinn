@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from './user.service';
@@ -22,21 +22,30 @@ export class AuthService {
       role: UserRole.HERO,
     });
 
-    const { passwordHash, ...result } = user;
-    return result;
+    if (!user) throw new InternalServerErrorException('Failed to create user');
+
+    return {
+      message: "Account created successfully",
+    };
   }
 
   async login(email: string, password: string) {
     const user = await this.userService.findByEmail(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) throw new UnauthorizedException('Invalid credentials');
 
     const payload = { sub: user.id, email: user.email, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, character: user.character },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        character: user.character
+      },
     };
   }
 }

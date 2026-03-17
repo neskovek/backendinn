@@ -10,12 +10,21 @@ export class UserRepository {
     private readonly repo: Repository<User>,
   ) {}
 
-  findAll(page = 1, limit = 100): Promise<User[]> {
-    return this.repo.find({
+  async findAll(page = 1, limit = 100): Promise<{ result: User[]; pagination: { page: number; itensCount: number; limit: number } }> {
+    const [result, itensCount] = await this.repo.findAndCount({
       relations: ['projects'],
       skip: (page - 1) * limit,
       take: limit,
     });
+
+    return {
+      result,
+      pagination: {
+        page,
+        itensCount,
+        limit,
+      },
+    };
   }
 
   findById(id: string): Promise<User | null> {
@@ -23,7 +32,11 @@ export class UserRepository {
   }
 
   findByEmail(email: string): Promise<User | null> {
-    return this.repo.findOne({ where: { email } });
+    return this.repo
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.email = :email', { email })
+      .getOne();
   }
 
   save(user: Partial<User>): Promise<User> {
