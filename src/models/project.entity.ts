@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -10,9 +11,9 @@ import { User } from './user.entity';
 import { Goals } from '../interfaces/goals';
 
 export enum ProjectStatus {
-  PENDING = 'pendente',
-  IN_PROGRESS = 'em andamento',
-  DONE = 'concluído',
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  DONE = 'done',
 }
 
 @Entity('projects')
@@ -38,4 +39,7 @@ export class Project {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

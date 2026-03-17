@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ProjectStatus } from '../../models/project.entity';
 import { GoalsDto } from './goals.dto';
 
@@ -26,8 +26,4 @@ export class CreateProjectDto {
   @Type(() => GoalsDto)
   goals?: GoalsDto[];
 
-  @ApiPropertyOptional({ example: 'uuid-here' })
-  @IsOptional()
-  @IsUUID()
-  userId?: string;
 }
