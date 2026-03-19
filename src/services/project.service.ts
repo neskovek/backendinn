@@ -33,8 +33,9 @@ export class ProjectService {
     return project;
   }
 
-  async save(data: Partial<Project>, userId?: string): Promise<{ id: string }> {
-    const project: Partial<Project> = { ...data };
+  async save(data: any): Promise<{ id: string }> {
+    const { userId, ...rest } = data;
+    const project: Partial<Project> = { ...rest };
     if (userId) project.user = { id: userId } as any;
     const savedProject = await this.projectRepository.save(project);
 
@@ -43,9 +44,12 @@ export class ProjectService {
     }
   }
 
-  async update(id: string, data: Partial<Project>, sessionUser?: { sub: string; role: UserRole }): Promise<{ id: string }> {
+  async update(id: string, data: any, sessionUser?: { sub: string; role: UserRole }): Promise<{ id: string }> {
     await this.findById(id, sessionUser);
-    const updatedProject = await this.projectRepository.update(id, data);
+    const { userId, ...rest } = data;
+    const payload: Partial<Project> = { ...rest };
+    if (userId !== undefined) payload.user = { id: userId } as any;
+    const updatedProject = await this.projectRepository.update(id, payload);
     if (!updatedProject) throw new NotFoundException('Project not found');
 
     return {

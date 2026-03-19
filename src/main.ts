@@ -7,13 +7,13 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(helmet());
-
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control'],
   });
+
+  app.use(helmet({ crossOriginResourcePolicy: false }));
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
@@ -26,6 +26,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 5000);
 }
 bootstrap();
