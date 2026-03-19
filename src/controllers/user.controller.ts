@@ -1,8 +1,10 @@
-import { Controller, Get, Delete, Param, Body, Put, Query, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Put, Query, UseGuards, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { UserService } from '../services/user.service';
+import { CreateUserDto } from '../dtos/user/create-user.dto';
 import { UpdateUserDto } from '../dtos/user/update-user.dto';
 import { JwtAuthGuard } from 'src/guards/auth.guard';
+import { AdminGuard } from 'src/guards/admin.guard';
 import { SessionUser } from 'src/decorators/sessionUser.decorator';
 
 @ApiTags('users')
@@ -11,6 +13,18 @@ import { SessionUser } from 'src/decorators/sessionUser.decorator';
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly usersService: UserService) {}
+
+  @Post()
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Criar usuário (apenas admin)' })
+  @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos.' })
+  @ApiResponse({ status: 401, description: 'Token JWT ausente ou inválido.' })
+  @ApiResponse({ status: 403, description: 'Apenas administradores podem criar usuários.' })
+  @ApiResponse({ status: 409, description: 'Email já em uso.' })
+  create(@Body() dto: CreateUserDto) {
+    return this.usersService.create(dto);
+  }
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os heróis' })

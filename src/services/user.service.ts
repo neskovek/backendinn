@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../repositories/user.repository';
-import { User } from '../models/user.entity';
+import { User, UserRole } from '../models/user.entity';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,22 @@ export class UserService {
 
   findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findByEmail(email);
+  }
+
+  async create(data: { name: string; email: string; password: string; character?: string; role?: UserRole }): Promise<{ id: string }> {
+    const existing = await this.usersRepository.findByEmail(data.email);
+    if (existing) throw new ConflictException('Email already in use');
+
+    const passwordHash = await bcrypt.hash(data.password, 10);
+    const user = await this.usersRepository.save({
+      name: data.name,
+      email: data.email,
+      passwordHash,
+      character: data.character,
+      role: data.role ?? UserRole.HERO,
+    });
+
+    return { id: user.id };
   }
 
   save(data: Partial<User>): Promise<User> {
