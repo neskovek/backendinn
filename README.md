@@ -116,3 +116,34 @@ npm run start:prod  # iniciar build de produção
 npm run test        # rodar testes
 npm run test:cov    # cobertura de testes
 ```
+
+## Decisões Técnicas
+
+### Arquitetura em camadas
+O projeto foi construido utilizando uma arquitetura em camadas com separação clara de responsabilidades: 
+- **Controllers** cuidam apenas do HTTP (rotas, validação de entrada, status codes);
+- **Services** concentram as regras de negócio; 
+- **Repositories** abstraem o acesso ao banco;
+- **Models** definem o schema;
+
+Isso facilita a manutenção, torna cada parte testável de forma isolada e permite trocar implementações (ex: banco de dados) sem afetar as outras camadas.
+
+### Stack principal
+**NestJS**, **TypeORM** e **PostgreSQL** foram adotados como requisito obrigatório do projeto. O NestJS fornece a estrutura para a construção da API, o TypeORM abstrai as queries SQL, e o PostgreSQL toda a parte de banco de dados.
+
+### Outras decisões
+- **JWT stateless**: autenticação sem sessão no servidor, o token carrega as propriedades `sub`, `email` e `role`, evitando consultas extras ao banco por requisição.
+- **Guards compostos** (`JwtAuthGuard` + `AdminGuard`): separam autenticação de autorização, permitindo aplicar cada proteção de forma declarativa e independente por rota.
+- **Dtos**: validação e transformação de entrada centralizada nos DTOs, sem lógica de validação espalhada nos controllers ou services.
+- **Swagger automático**: documentação gerada a partir dos decorators dos DTOs e controllers, sempre sincronizada com o código.
+- **Helmet**: headers de segurança HTTP e rate limiting (60 req/60s) como camada extra de proteção sem lógica customizada.
+- **Tipo JSONB para Goals**: metas armazenadas como array JSON dentro do projeto. Por serem sempre acessadas junto ao projeto e sem necessidade de queries independentes, JSONB evita uma tabela extra e JOIN adicional.
+
+## Sugestões de Melhoria
+
+1. **Padronização de respostas**: criar um interceptor global que envolva todos os retornos em um envelope `{ data, meta, error }` — atualmente cada rota retorna formatos distintos, o que complica o tratamento no cliente.
+2. **Rotas de indicadores**: endpoints como `GET /project/stats` (projetos agrupados por status) e `GET /user/:id/stats` (metas concluídas vs. pendentes) para alimentar dashboards e gráficos sem processamento no front-end.
+3. **Filtro de exceções globalizados**: padronizar todos os erros HTTP com estrutura consistente, em vez de depender do comportamento padrão do NestJS.
+4. **Testes automatizados**: adicionar testes unitários nos services e testes de integração nos controllers.
+5. **Utilizar migrations em vez de `synchronize`**: substituir `synchronize: false` por migrations TypeORM para controlar alterações no schema com rastreabilidade.
+6. **Endpoint de reset de senha**: fluxo de recuperação via e-mail com token temporário, já que hoje não há como recuperar acesso sem intervenção direta no banco.
