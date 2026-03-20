@@ -130,9 +130,7 @@ Isso facilita a manutenção, torna cada parte testável de forma isolada e perm
 
 ### Stack principal
 **NestJS**, **TypeORM** e **PostgreSQL** foram adotados como requisito obrigatório do projeto. O NestJS fornece a estrutura para a construção da API, o TypeORM abstrai as queries SQL, e o PostgreSQL toda a parte de banco de dados.
-
-### Outras decisões
-- **JWT stateless**: autenticação sem sessão no servidor, o token carrega as propriedades `sub`, `email` e `role`, evitando consultas extras ao banco por requisição.
+- **JWT**: autenticação sem sessão no servidor, o token carrega as propriedades `sub`, `email` e `role`, evitando consultas extras ao banco por requisição.
 - **Guards compostos** (`JwtAuthGuard` + `AdminGuard`): separam autenticação de autorização, permitindo aplicar cada proteção de forma declarativa e independente por rota.
 - **Dtos**: validação e transformação de entrada centralizada nos DTOs, sem lógica de validação espalhada nos controllers ou services.
 - **Swagger automático**: documentação gerada a partir dos decorators dos DTOs e controllers, sempre sincronizada com o código.
