@@ -3,17 +3,40 @@ import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../repositories/user.repository';
 import { User, UserRole } from '../models/user.entity';
 
+//CONSTANTES 
+const HASH_SALT_ROUNDS = 10;
+
+//DTOs e INTERFACES
+export interface CreateUserDto {
+  name: string;
+  email: string;
+  password: string;
+  character?: string;
+  role?: UserRole;
+}
+
+export interface PaginatedResult<T> {
+  result: T[];
+  pagination: {
+    page: number;
+    itensCount: number; 
+    limit: number;
+  };
+}
+
 @Injectable()
 export class UserService {
   constructor(private readonly usersRepository: UserRepository) {}
 
-  findAll(page?: number, limit?: number): Promise<{ result: User[]; pagination: { page: number; itensCount: number; limit: number } }> {
+  findAll(page?: number, limit?: number): Promise<PaginatedResult<User>> {
     return this.usersRepository.findAll(page, limit);
   }
 
   async findById(id: string): Promise<User> {
     const user = await this.usersRepository.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user;
   }
 
@@ -21,11 +44,14 @@ export class UserService {
     return this.usersRepository.findByEmail(email);
   }
 
-  async create(data: { name: string; email: string; password: string; character?: string; role?: UserRole }): Promise<{ id: string }> {
-    const existing = await this.usersRepository.findByEmail(data.email);
-    if (existing) throw new ConflictException('Email already in use');
+  async create(data: CreateUserDto): Promise<{ id: string }> {
+    const existingUser = await this.findByEmail(data.email);
+    if (existingUser) {
+      throw new ConflictException('Email already in use');
+    }
 
-    const passwordHash = await bcrypt.hash(data.password, 10);
+    const passwordHash = await bcrypt.hash(data.password, HASH_SALT_ROUNDS);
+    
     const user = await this.usersRepository.save({
       name: data.name,
       email: data.email,
@@ -43,15 +69,15 @@ export class UserService {
 
   async update(id: string, data: Partial<User>): Promise<{ id: string }> {
     const updatedUser = await this.usersRepository.update(id, data);
-    if (!updatedUser) throw new NotFoundException('User not found');
-
-    return {
-      id: updatedUser.id
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
     }
+
+    return { id: updatedUser.id };
   }
 
   async delete(id: string): Promise<void> {
-    await this.findById(id);
+    await this.findById(id); 
     return this.usersRepository.delete(id);
   }
 }
