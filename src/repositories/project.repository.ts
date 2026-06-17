@@ -14,7 +14,10 @@ export class ProjectRepository {
     filters?: { status?: ProjectStatus; userId?: string },
     page = 1,
     limit = 100,
-  ): Promise<{ result: Project[]; pagination: { page: number; itensCount: number; limit: number } }> {
+  ): Promise<{
+    result: Project[];
+    pagination: { page: number; itensCount: number; limit: number };
+  }> {
     const where: any = {};
 
     if (filters?.status) where.status = filters.status;
@@ -34,7 +37,7 @@ export class ProjectRepository {
         itensCount,
         limit,
       },
-    }
+    };
   }
 
   findById(id: string): Promise<Project | null> {

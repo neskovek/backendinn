@@ -1,13 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { ProjectStatus } from '../../models/project.entity';
 import { GoalsDto } from './goals.dto';
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'My Project' })
   @IsString()
-  name: string;
+  name?: string;
 
   @ApiPropertyOptional({ example: 'A cool project' })
   @IsOptional()

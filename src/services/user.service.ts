@@ -1,19 +1,30 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../repositories/user.repository';
 import { User, UserRole } from '../models/user.entity';
+import { ErrorMessages } from '../constants/error-messages.constant';
 
 @Injectable()
 export class UserService {
   constructor(private readonly usersRepository: UserRepository) {}
 
-  findAll(page?: number, limit?: number): Promise<{ result: User[]; pagination: { page: number; itensCount: number; limit: number } }> {
+  findAll(
+    page?: number,
+    limit?: number,
+  ): Promise<{
+    result: User[];
+    pagination: { page: number; itensCount: number; limit: number };
+  }> {
     return this.usersRepository.findAll(page, limit);
   }
 
   async findById(id: string): Promise<User> {
     const user = await this.usersRepository.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException(ErrorMessages.USER_NOT_FOUND);
     return user;
   }
 
@@ -21,9 +32,16 @@ export class UserService {
     return this.usersRepository.findByEmail(email);
   }
 
-  async create(data: { name: string; email: string; password: string; character?: string; role?: UserRole }): Promise<{ id: string }> {
+  async create(data: {
+    name: string;
+    email: string;
+    password: string;
+    character?: string;
+    role?: UserRole;
+  }): Promise<{ id: string }> {
     const existing = await this.usersRepository.findByEmail(data.email);
-    if (existing) throw new ConflictException('Email already in use');
+    if (existing)
+      throw new ConflictException(ErrorMessages.EMAIL_ALREADY_IN_USE);
 
     const passwordHash = await bcrypt.hash(data.password, 10);
     const user = await this.usersRepository.save({
@@ -43,11 +61,11 @@ export class UserService {
 
   async update(id: string, data: Partial<User>): Promise<{ id: string }> {
     const updatedUser = await this.usersRepository.update(id, data);
-    if (!updatedUser) throw new NotFoundException('User not found');
+    if (!updatedUser) throw new NotFoundException(ErrorMessages.USER_NOT_FOUND);
 
     return {
-      id: updatedUser.id
-    }
+      id: updatedUser.id,
+    };
   }
 
   async delete(id: string): Promise<void> {

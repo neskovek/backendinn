@@ -21,7 +21,10 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autenticar herói e obter token JWT' })
-  @ApiResponse({ status: 200, description: 'Login realizado com sucesso. Retorna o token JWT.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login realizado com sucesso. Retorna o token JWT.',
+  })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 401, description: 'Credenciais incorretas.' })
   login(@Body() dto: LoginDto) {

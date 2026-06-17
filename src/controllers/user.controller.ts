@@ -1,11 +1,29 @@
-import { Controller, Get, Post, Delete, Param, Body, Put, Query, UseGuards, ForbiddenException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  Put,
+  Query,
+  UseGuards,
+  ForbiddenException,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dtos/user/create-user.dto';
 import { UpdateUserDto } from '../dtos/user/update-user.dto';
 import { JwtAuthGuard } from 'src/guards/auth.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { SessionUser } from 'src/decorators/sessionUser.decorator';
+import { ErrorMessages } from 'src/constants/error-messages.constant';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -20,7 +38,10 @@ export class UserController {
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 401, description: 'Token JWT ausente ou inválido.' })
-  @ApiResponse({ status: 403, description: 'Apenas administradores podem criar usuários.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Apenas administradores podem criar usuários.',
+  })
   @ApiResponse({ status: 409, description: 'Email já em uso.' })
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
@@ -30,12 +51,12 @@ export class UserController {
   @ApiOperation({ summary: 'Listar todos os heróis' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de usuários retornada com sucesso.',
+  })
   @ApiResponse({ status: 401, description: 'Token JWT ausente ou inválido.' })
-  findAll(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.usersService.findAll(Number(page) || 1, Number(limit) || 100);
   }
 
@@ -53,13 +74,18 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 401, description: 'Token JWT ausente ou inválido.' })
-  @ApiResponse({ status: 403, description: 'Sem permissão para editar este usuário.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sem permissão para editar este usuário.',
+  })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
-  update(@Param('id') id: string, @Body() data: UpdateUserDto, @SessionUser() user: any) {
-    if (
-      user.role !== 'admin'
-      && user.sub !== id
-    ) throw new ForbiddenException('Access denied');
+  update(
+    @Param('id') id: string,
+    @Body() data: UpdateUserDto,
+    @SessionUser() user: any,
+  ) {
+    if (user.role !== 'admin' && user.sub !== id)
+      throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
 
     return this.usersService.update(id, data);
   }
@@ -68,13 +94,14 @@ export class UserController {
   @ApiOperation({ summary: 'Remover herói (admin ou o próprio usuário)' })
   @ApiResponse({ status: 200, description: 'Usuário removido com sucesso.' })
   @ApiResponse({ status: 401, description: 'Token JWT ausente ou inválido.' })
-  @ApiResponse({ status: 403, description: 'Sem permissão para remover este usuário.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sem permissão para remover este usuário.',
+  })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   remove(@Param('id') id: string, @SessionUser() user: any) {
-    if (
-      user.role !== 'admin'
-      && user.sub !== id
-    ) throw new ForbiddenException('Access denied');
+    if (user.role !== 'admin' && user.sub !== id)
+      throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
 
     return this.usersService.delete(id);
   }

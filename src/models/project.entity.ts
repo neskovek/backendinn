@@ -33,7 +33,10 @@ export class Project {
   @Column({ type: 'jsonb', nullable: true })
   goals: Goals[];
 
-  @ManyToOne(() => User, (user) => user.projects, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => User, (user) => user.projects, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

@@ -1,4 +1,3 @@
-
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -34,6 +33,6 @@ import { HealthController } from 'src/controllers/health.controller';
     AuthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
-  controllers: [HealthController]
+  controllers: [HealthController],
 })
 export class AppModule {}

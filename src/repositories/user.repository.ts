@@ -10,7 +10,13 @@ export class UserRepository {
     private readonly repo: Repository<User>,
   ) {}
 
-  async findAll(page = 1, limit = 100): Promise<{ result: User[]; pagination: { page: number; itensCount: number; limit: number } }> {
+  async findAll(
+    page = 1,
+    limit = 100,
+  ): Promise<{
+    result: User[];
+    pagination: { page: number; itensCount: number; limit: number };
+  }> {
     const [result, itensCount] = await this.repo.findAndCount({
       relations: ['projects'],
       skip: (page - 1) * limit,

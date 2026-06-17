@@ -1,7 +1,12 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProjectRepository } from '../repositories/project.repository';
 import { Project, ProjectStatus } from '../models/project.entity';
 import { UserRole } from '../models/user.entity';
+import { ErrorMessages } from '../constants/error-messages.constant';
 
 @Injectable()
 export class ProjectService {
@@ -11,23 +16,25 @@ export class ProjectService {
     filters?: { status?: ProjectStatus; userId?: string },
     page?: number,
     limit?: number,
-  ): Promise<{ result: Project[]; pagination: { page: number; itensCount: number; limit: number } }> {
+  ): Promise<{
+    result: Project[];
+    pagination: { page: number; itensCount: number; limit: number };
+  }> {
     return this.projectRepository.findAll(filters, page, limit);
   }
 
-  async findById(id: string, sessionUser?: { sub: string; role: UserRole }): Promise<Project> {
+  async findById(
+    id: string,
+    sessionUser?: { sub: string; role: UserRole },
+  ): Promise<Project> {
     const project = await this.projectRepository.findById(id);
-    if (!project) throw new NotFoundException('Project not found');
+    if (!project) throw new NotFoundException(ErrorMessages.PROJECT_NOT_FOUND);
 
     const isNotAdmin = sessionUser?.role !== UserRole.ADMIN;
     const isNotOwner = project.user?.id !== sessionUser?.sub;
 
-    if (
-      sessionUser
-      && isNotAdmin
-      && isNotOwner
-    ) {
-      throw new ForbiddenException('Access denied');
+    if (sessionUser && isNotAdmin && isNotOwner) {
+      throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
     }
 
     return project;
@@ -40,24 +47,32 @@ export class ProjectService {
     const savedProject = await this.projectRepository.save(project);
 
     return {
-      id: savedProject.id
-    }
+      id: savedProject.id,
+    };
   }
 
-  async update(id: string, data: any, sessionUser?: { sub: string; role: UserRole }): Promise<{ id: string }> {
+  async update(
+    id: string,
+    data: any,
+    sessionUser?: { sub: string; role: UserRole },
+  ): Promise<{ id: string }> {
     await this.findById(id, sessionUser);
     const { userId, ...rest } = data;
     const payload: Partial<Project> = { ...rest };
     if (userId !== undefined) payload.user = { id: userId } as any;
     const updatedProject = await this.projectRepository.update(id, payload);
-    if (!updatedProject) throw new NotFoundException('Project not found');
+    if (!updatedProject)
+      throw new NotFoundException(ErrorMessages.PROJECT_NOT_FOUND);
 
     return {
-      id: updatedProject.id
-    }
+      id: updatedProject.id,
+    };
   }
 
-  async delete(id: string, sessionUser?: { sub: string; role: UserRole }): Promise<void> {
+  async delete(
+    id: string,
+    sessionUser?: { sub: string; role: UserRole },
+  ): Promise<void> {
     await this.findById(id, sessionUser);
     return this.projectRepository.delete(id);
   }
