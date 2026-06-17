@@ -20,8 +20,8 @@ const mockUser = (overrides: Partial<User> = {}): User =>
 
 describe('AuthService', () => {
   let service: AuthService;
-  let userService: jest.Mocked<Pick<UserService, 'findByEmail'>>;
-  let jwtService: jest.Mocked<Pick<JwtService, 'sign'>>;
+  let userService: { findByEmail: jest.Mock };
+  let jwtService: { sign: jest.Mock };
 
   beforeEach(async () => {
     userService = { findByEmail: jest.fn() };
@@ -42,12 +42,21 @@ describe('AuthService', () => {
   describe('login', () => {
     it('Deve retornar o token de acesso e o usuário', async () => {
       userService.findByEmail.mockResolvedValue(mockUser());
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      jest.mocked(bcrypt.compare).mockResolvedValue(true as never);
       jwtService.sign.mockReturnValue('jwt-token');
 
       const result = await service.login('hero@test.com', 'plain');
 
-      expect(result).toEqual({ access_token: 'jwt-token' });
+      expect(result).toMatchObject({
+        access_token: 'jwt-token',
+        user: {
+          id: 'user-1',
+          email: 'hero@test.com',
+          name: 'Hero One',
+          role: UserRole.HERO,
+        },
+      });
+
       expect(jwtService.sign).toHaveBeenCalledWith(
         expect.objectContaining({ sub: 'user-1', role: UserRole.HERO }),
       );
@@ -63,7 +72,7 @@ describe('AuthService', () => {
 
     it('Deve lançar UnauthorizedException quando a senha estiver incorreta', async () => {
       userService.findByEmail.mockResolvedValue(mockUser());
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      jest.mocked(bcrypt.compare).mockResolvedValue(false as never);
 
       await expect(service.login('hero@test.com', 'wrong')).rejects.toThrow(
         UnauthorizedException,

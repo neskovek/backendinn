@@ -89,10 +89,16 @@ export class UserService {
 
   async update(id: string, data: Partial<User>): Promise<{ id: string }> {
     try {
-      const updatedUser = await this.usersRepository.update(id, data);
-      if (!updatedUser) {
+      const user = await this.usersRepository.findById(id);
+      if (!user) {
         throw new NotFoundException(ErrorMessages.USER_NOT_FOUND);
       }
+
+      const updatedUser = await this.usersRepository.update(id, data);
+      if (!updatedUser) {
+        throw new NotFoundException(ErrorMessages.FAILED_TO_UPDATE_USER);
+      }
+
       return { id: updatedUser.id };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
