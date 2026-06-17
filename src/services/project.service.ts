@@ -40,8 +40,8 @@ export class ProjectService {
   }
 
   async save(data: CreateProjectDto): Promise<{ id: string }> {
-    const { userId, ...rest } = data;
-    const project: Partial<Project> = { ...rest };
+    const { userId, ...updateData } = data;
+    const project: Partial<Project> = { ...updateData };
     if (userId) project.user = { id: userId } as Project['user'];
     const savedProject = await this.projectRepository.save(project);
     return { id: savedProject.id };
@@ -54,8 +54,8 @@ export class ProjectService {
   ): Promise<{ id: string }> {
     await this.findById(id, sessionUser);
 
-    const { userId, ...rest } = data;
-    const payload: Partial<Project> = { ...rest };
+    const { userId, ...updateData } = data;
+    const payload: Partial<Project> = { ...updateData };
     if (userId !== undefined) payload.user = { id: userId } as Project['user'];
 
     const updatedProject = await this.projectRepository.update(id, payload);
