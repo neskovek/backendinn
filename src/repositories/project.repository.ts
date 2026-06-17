@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { Project, ProjectStatus } from '../models/project.entity';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class ProjectRepository {
     result: Project[];
     pagination: { page: number; itensCount: number; limit: number };
   }> {
-    const where: any = {};
+    const where: FindOptionsWhere<Project> = {};
 
     if (filters?.status) where.status = filters.status;
     if (filters?.userId) where.user = { id: filters.userId };

@@ -20,9 +20,11 @@ import { ProjectStatus } from '../models/project.entity';
 import { ProjectService } from '../services/project.service';
 import { CreateProjectDto } from '../dtos/project/create-project.dto';
 import { UpdateProjectDto } from '../dtos/project/update-project.dto';
-import { JwtAuthGuard } from 'src/guards/auth.guard';
-import { AdminGuard } from 'src/guards/admin.guard';
-import { SessionUser } from 'src/decorators/sessionUser.decorator';
+import { JwtAuthGuard } from '../guards/auth.guard';
+import { SessionUser } from '../decorators/sessionUser.decorator';
+import { SessionUser as SessionUserType } from '../interfaces/session';
+import { AdminGuard } from '../guards/admin.guard';
+import { UserRole } from '../models/user.entity';
 
 @ApiTags('projects')
 @ApiBearerAuth()
@@ -50,13 +52,13 @@ export class ProjectController {
   })
   @ApiResponse({ status: 401, description: 'Token JWT ausente ou inválido.' })
   findAll(
-    @SessionUser() user: any,
+    @SessionUser() user: SessionUserType,
     @Query('status') status?: ProjectStatus,
     @Query('userId') userId?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    const effectiveUserId = user.role === 'admin' ? userId : user.sub;
+    const effectiveUserId = user.role === UserRole.ADMIN ? userId : user.sub;
     return this.projectsService.findAll(
       { status, userId: effectiveUserId },
       Number(page) || 1,
@@ -73,7 +75,7 @@ export class ProjectController {
     description: 'Sem permissão para visualizar este projeto.',
   })
   @ApiResponse({ status: 404, description: 'Projeto não encontrado.' })
-  findOne(@Param('id') id: string, @SessionUser() user: any) {
+  findOne(@Param('id') id: string, @SessionUser() user: SessionUserType) {
     return this.projectsService.findById(id, user);
   }
 
@@ -116,7 +118,7 @@ export class ProjectController {
     description: 'Apenas administradores podem remover projetos.',
   })
   @ApiResponse({ status: 404, description: 'Projeto não encontrado.' })
-  remove(@Param('id') id: string, @SessionUser() user: any) {
+  remove(@Param('id') id: string, @SessionUser() user: SessionUserType) {
     return this.projectsService.delete(id, user);
   }
 }

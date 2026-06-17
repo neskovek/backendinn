@@ -20,10 +20,12 @@ import {
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dtos/user/create-user.dto';
 import { UpdateUserDto } from '../dtos/user/update-user.dto';
-import { JwtAuthGuard } from 'src/guards/auth.guard';
-import { AdminGuard } from 'src/guards/admin.guard';
-import { SessionUser } from 'src/decorators/sessionUser.decorator';
-import { ErrorMessages } from 'src/constants/error-messages.constant';
+import { UserRole } from '../models/user.entity';
+import { JwtAuthGuard } from '../guards/auth.guard';
+import { AdminGuard } from '../guards/admin.guard';
+import { SessionUser } from '../decorators/sessionUser.decorator';
+import { SessionUser as SessionUserType } from '../interfaces/session';
+import { ErrorMessages } from '../constants/error-messages.constant';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -31,11 +33,13 @@ import { ErrorMessages } from 'src/constants/error-messages.constant';
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly usersService: UserService) {}
-  
-  private ensureUserHasPermission(currentUser: any, targetId: string, action: 'atualizar' | 'remover') {
-    const isAdmin = currentUser.role === 'admin';
-    const isOwner = currentUser.sub === targetId;
 
+  private ensureUserHasPermission(
+    currentUser: SessionUserType,
+    targetId: string,
+  ): void {
+    const isAdmin = currentUser.role === UserRole.ADMIN;
+    const isOwner = currentUser.sub === targetId;
     if (!isAdmin && !isOwner) {
       throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
     }
@@ -91,9 +95,9 @@ export class UserController {
   update(
     @Param('id') id: string,
     @Body() data: UpdateUserDto,
-    @SessionUser() user: any,
+    @SessionUser() user: SessionUserType,
   ) {
-    this.ensureUserHasPermission(user, id, 'atualizar');
+    this.ensureUserHasPermission(user, id);
     return this.usersService.update(id, data);
   }
 
@@ -106,8 +110,8 @@ export class UserController {
     description: 'Sem permissão para remover este usuário.',
   })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
-  remove(@Param('id') id: string, @SessionUser() user: any) {
-    this.ensureUserHasPermission(user, id, 'remover');
+  remove(@Param('id') id: string, @SessionUser() user: SessionUserType) {
+    this.ensureUserHasPermission(user, id);
     return this.usersService.delete(id);
   }
 }

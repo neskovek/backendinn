@@ -6,7 +6,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 import { ErrorMessages } from '../constants/error-messages.constant';
+import { SessionUser } from '../interfaces/session';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -16,15 +18,17 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
-
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: SessionUser }>();
     const token = request.headers.authorization?.split(' ')[1];
+
     if (!token)
       throw new UnauthorizedException(ErrorMessages.MISSING_AUTH_TOKEN);
 
     try {
-      request.user = this.jwtService.verify(token, {
-        secret: this.configService.get('JWT_SECRET'),
+      request.user = this.jwtService.verify<SessionUser>(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
       });
       return true;
     } catch {

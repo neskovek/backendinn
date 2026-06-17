@@ -8,7 +8,7 @@ import { UserModule } from './user.module';
 import { AuthModule } from './auth.module';
 import { User } from '../models/user.entity';
 import { Project } from '../models/project.entity';
-import { HealthController } from 'src/controllers/health.controller';
+import { HealthController } from '../controllers/health.controller';
 
 @Module({
   imports: [

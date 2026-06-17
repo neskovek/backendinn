@@ -19,30 +19,30 @@ export enum ProjectStatus {
 @Entity('projects')
 export class Project {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ nullable: true })
-  description: string;
+  description?: string;
 
   @Column({ type: 'enum', enum: ProjectStatus, default: ProjectStatus.PENDING })
-  status: ProjectStatus;
+  status!: ProjectStatus;
 
   @Column({ type: 'jsonb', nullable: true })
-  goals: Goals[];
+  goals?: Goals[];
 
   @ManyToOne(() => User, (user) => user.projects, {
     onDelete: 'SET NULL',
     nullable: true,
   })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user!: User;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

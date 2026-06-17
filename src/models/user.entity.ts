@@ -17,30 +17,30 @@ export enum UserRole {
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ unique: true })
   @Unique(['email'])
-  email: string;
+  email!: string;
 
   @Column({ select: false })
-  passwordHash: string;
+  passwordHash!: string;
 
   @Column({ nullable: true })
-  character: string;
+  character?: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.HERO })
-  role: UserRole;
+  role!: UserRole;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @OneToMany(() => Project, (project) => project.user)
-  projects: Project[];
+  projects!: Project[];
 }
