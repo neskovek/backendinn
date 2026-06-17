@@ -31,6 +31,15 @@ import { ErrorMessages } from 'src/constants/error-messages.constant';
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly usersService: UserService) {}
+  
+  private ensureUserHasPermission(currentUser: any, targetId: string, action: 'atualizar' | 'remover') {
+    const isAdmin = currentUser.role === 'admin';
+    const isOwner = currentUser.sub === targetId;
+
+    if (!isAdmin && !isOwner) {
+      throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
+    }
+  }
 
   @Post()
   @UseGuards(AdminGuard)
@@ -84,9 +93,7 @@ export class UserController {
     @Body() data: UpdateUserDto,
     @SessionUser() user: any,
   ) {
-    if (user.role !== 'admin' && user.sub !== id)
-      throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
-
+    this.ensureUserHasPermission(user, id, 'atualizar');
     return this.usersService.update(id, data);
   }
 
@@ -100,9 +107,7 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   remove(@Param('id') id: string, @SessionUser() user: any) {
-    if (user.role !== 'admin' && user.sub !== id)
-      throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
-
+    this.ensureUserHasPermission(user, id, 'remover');
     return this.usersService.delete(id);
   }
 }

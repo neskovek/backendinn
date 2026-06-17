@@ -8,7 +8,17 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from './user.service';
 import { UserRole } from '../models/user.entity';
-import { ErrorMessages } from '../constants/error-messages.constant';
+
+//CONSTANTES
+const HASH_SALT_ROUNDS = 10;
+
+//DTOs e INTERFACES
+export interface RegisterDto {
+  name: string;
+  email: string;
+  password: string;
+  character?: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -17,27 +27,24 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(data: {
-    name: string;
-    email: string;
-    password: string;
-    character?: string;
-  }) {
-    const existing = await this.userService.findByEmail(data.email);
-    if (existing)
-      throw new ConflictException(ErrorMessages.EMAIL_ALREADY_IN_USE);
+  async register(data: RegisterDto) {
+    const existingUser = await this.userService.findByEmail(data.email);
+    if (existingUser) {
+      throw new ConflictException('Email already in use');
+    }
 
-    const hashed = await bcrypt.hash(data.password, 10);
+  
+    const hashed = await bcrypt.hash(data.password, HASH_SALT_ROUNDS);
+    
     const user = await this.userService.save({
       ...data,
       passwordHash: hashed,
       role: UserRole.HERO,
     });
 
-    if (!user)
-      throw new InternalServerErrorException(
-        ErrorMessages.FAILED_TO_CREATE_USER,
-      );
+    if (!user) {
+      throw new InternalServerErrorException('Failed to create user');
+    }
 
     return {
       message: 'Account created successfully',
@@ -46,14 +53,17 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.userService.findByEmail(email);
-    if (!user)
-      throw new UnauthorizedException(ErrorMessages.INVALID_CREDENTIALS);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid)
-      throw new UnauthorizedException(ErrorMessages.INVALID_CREDENTIALS);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
+    
     return {
       access_token: this.jwtService.sign(payload),
       user: {

@@ -11,16 +11,16 @@ import { UserRole } from '../../models/user.entity';
 export class CreateUserDto {
   @ApiProperty({ example: 'João Silva' })
   @IsString()
-  name?: string;
+  name!: string;
 
   @ApiProperty({ example: 'joao@email.com' })
   @IsEmail()
-  email?: string;
+  email!: string;
 
   @ApiProperty({ example: '123456', minLength: 6 })
   @IsString()
   @MinLength(6)
-  password?: string;
+  password!: string;
 
   @ApiPropertyOptional({ example: 'Warrior' })
   @IsOptional()

@@ -14,7 +14,7 @@ import { GoalsDto } from './goals.dto';
 export class CreateProjectDto {
   @ApiProperty({ example: 'My Project' })
   @IsString()
-  name?: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 'A cool project' })
   @IsOptional()
