@@ -14,6 +14,19 @@ import { SessionUser } from 'src/decorators/sessionUser.decorator';
 export class UserController {
   constructor(private readonly usersService: UserService) {}
 
+  
+  private ensureUserHasPermission(currentUser: any, targetId: string, action: 'atualizar' | 'remover') {
+    const isAdmin = currentUser.role === 'admin';
+    const isOwner = currentUser.sub === targetId;
+
+    if (!isAdmin && !isOwner) {
+      throw new ForbiddenException(
+        `Permissão negada: você não tem autorização para ${action} os dados de outro usuário.`
+      );
+    }
+  }
+
+  
   @Post()
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Criar usuário (apenas admin)' })
@@ -56,10 +69,8 @@ export class UserController {
   @ApiResponse({ status: 403, description: 'Sem permissão para editar este usuário.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   update(@Param('id') id: string, @Body() data: UpdateUserDto, @SessionUser() user: any) {
-    if (
-      user.role !== 'admin'
-      && user.sub !== id
-    ) throw new ForbiddenException('Access denied');
+    
+    this.ensureUserHasPermission(user, id, 'atualizar');
 
     return this.usersService.update(id, data);
   }
@@ -71,10 +82,8 @@ export class UserController {
   @ApiResponse({ status: 403, description: 'Sem permissão para remover este usuário.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   remove(@Param('id') id: string, @SessionUser() user: any) {
-    if (
-      user.role !== 'admin'
-      && user.sub !== id
-    ) throw new ForbiddenException('Access denied');
+    
+    this.ensureUserHasPermission(user, id, 'remover');
 
     return this.usersService.delete(id);
   }
