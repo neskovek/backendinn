@@ -73,6 +73,11 @@ JWT_SECRET=sua_chave_secreta_aqui
 JWT_EXPIRES_IN=1d
 ```
 
+## Branches principais
+
+- `original` - Branch com a versão original do projeto.
+- `main` - Branch com as correções propostas.
+
 ## Endpoints
 
 | Método | Rota           | Descrição                    | Auth    |
