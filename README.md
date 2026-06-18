@@ -2,6 +2,9 @@
 
 Backend do portal **HeroForce** — sistema de gestão e vendas de projetos heroicos. Construído com NestJS, TypeORM e PostgreSQL.
 
+## Brachs 
+- **Original** - Projeto sem a alteração dos code smells 
+
 ## Tecnologias
 
 - **NestJS** — framework Node.js
